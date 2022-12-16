@@ -1,0 +1,40 @@
+body {
+	margin: 0;
+	padding: 0;
+    background: #E5E5E5;
+}
+
+@font-face {
+    font-family: 'Inter UI';
+    src: url('./Inter-UI-Regular.otf') format("opentype");
+}
+
+.body__app {
+    margin-left: auto;
+    margin-right: auto;
+    font-family: 'Inter UI';
+    padding-left: 36px;
+    padding-right: 36px;
+    padding-bottom: 36px;
+}
+
+.app {
+    background: #FFFFFF;
+    width: 1110px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.app__tabs-switch {
+    align-self: center;
+}
+
+.app__card-list {
+    margin: 0;
+}
+
+.app__pagination {
+    align-self: center;
+}

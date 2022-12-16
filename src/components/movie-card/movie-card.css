@@ -1,0 +1,66 @@
+.movie-card {
+    min-width: 454px;
+    height: 280px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 0 15px 0 #E5E5E5;
+}
+
+.movie-card__title {
+    font-family: 'Inter UI';
+    font-size: 20px;
+    line-height: 28px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.movie-card__poster {
+    max-width: 180px;
+}
+
+.movie-card__info-layout {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    padding-left: 20px;
+}
+
+.movie-card__date {
+    color: #827E7E;
+}
+
+.movie-card__tags {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 9px;
+}
+
+.movie-card__info {
+    font-family: 'Inter UI';
+    font-size: 12px;
+    line-height: 22px;
+    margin-top: 9px;
+}
+
+.movie-card__rate {
+    width: auto;
+    margin-top: auto;
+}
+
+.movie-card__circle-rate {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #E9D100;
+    font-family: 'Inter UI';
+    font-size: 12px;
+    line-height: 22px;
+    border-radius: 50%;
+    padding: 3px;
+    padding-left: 4px;
+    box-sizing: border-box;
+    align-self: flex-start;
+    flex-shrink: 0;
+}

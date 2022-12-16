@@ -1,0 +1,10 @@
+.movie-card-list {
+    display: block;
+    padding-top: 36px;
+    padding-bottom: 36px;
+}
+
+.movie-card-list__card {
+    display: flex;
+    flex-direction: row;
+}
