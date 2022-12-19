@@ -14,20 +14,6 @@
     flex-direction: column;
 }
 
-/*overwriting ant styles for pagination*/
-ul.ant-pagination > .ant-pagination-item-active {
-    background-color: #1890FF;
-    border-style: none;
-}
-
-ul.ant-pagination > .ant-pagination-item-active > a {
-    color: #FFFFFF;
-}
-
-ul.ant-pagination > .ant-pagination-item-active:hover > a {
-    color: #E5E5E5;
-}
-
 @media (max-width: 768px) {
     .movie-card-list {
         padding-top: 10px;
