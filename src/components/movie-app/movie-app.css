@@ -38,3 +38,13 @@ body {
 .app__pagination {
     align-self: center;
 }
+
+@media (max-width: 768px) {
+	.app {
+		width: auto;
+	}
+    .body__app {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}

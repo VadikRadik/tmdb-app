@@ -6,7 +6,8 @@ import MovieCard from '../movie-card'
 import './movie-card-list.css'
 
 const MovieCardList = ({ movies }) => {
-  //const cards = new Array(6).fill(MovieCard())
+  const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
+  const gridGutters = isMobile ? [16, 20] : [36, 36]
   const cards = movies.map((movie) => {
     return (
       <MovieCard
@@ -21,7 +22,7 @@ const MovieCardList = ({ movies }) => {
   })
   return (
     <div className="movie-card-list app__card-list">
-      <Row gutter={[36, 36]}>{cards}</Row>
+      <Row gutter={gridGutters}>{cards}</Row>
     </div>
   )
 }
