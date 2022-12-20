@@ -75,6 +75,11 @@
     display: none;
 }
 
+.movie-card__spin {
+    margin-left: 16px;
+    margin-top: 16px;
+}
+
 @media (max-width: 768px) {
     .movie-card__poster {
         max-width: 60px;

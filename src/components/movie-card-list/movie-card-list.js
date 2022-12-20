@@ -1,5 +1,5 @@
 import React from 'react'
-import { Row } from 'antd'
+import { Row, Spin } from 'antd'
 
 import MovieCard from '../movie-card'
 
@@ -11,9 +11,13 @@ export default class MovieCardList extends React.Component {
   }
 
   render() {
+    if (this.props.loading) {
+      return <Spin tip="Loading" size="large" className="movie-card-list__spin"></Spin>
+    }
     if (this.props.movies === null) {
       return null
     }
+
     console.log(this.props.movies)
     const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
     const gridGutters = isMobile ? [16, 20] : [36, 36]

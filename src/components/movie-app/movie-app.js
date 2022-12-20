@@ -10,9 +10,11 @@ export default class MovieApp extends React.Component {
     movies: null,
     resultsCount: null,
     resultPage: null,
+    moviesListLoading: false,
   }
 
   async getMovies(keyWords) {
+    this.setState({ movingListLoading: true })
     const res = await fetch(
       // eslint-disable-next-line no-undef
       `https://api.themoviedb.org/3/search/movie?query=${keyWords}&api_key=${process.env.REACT_APP_TMDB_API_KEY}`
@@ -21,26 +23,30 @@ export default class MovieApp extends React.Component {
       throw new Error(`Unable to fetch movies, responce status: ${res.status}`)
     }
 
-    const result = await res.json().catch((err) => console.log(err))
-
-    return result
+    return res.json()
   }
 
   updatePage = (keyWords) => {
-    this.getMovies(keyWords).then((result) => {
-      console.log(result)
-      this.setState(() => {
-        return {
-          movies: result.results,
-          resultsCount: result.total_results,
-          resultPage: result.page,
-        }
-      })
+    this.setState({ moviesListLoading: true })
+    this.getMovies(keyWords).then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
+  }
+
+  onMoviesListLoadError = (error) => {
+    console.log(`Ooops ${error}`)
+  }
+
+  onMoviesListLoaded = (result) => {
+    this.setState(() => {
+      return {
+        movies: result.results,
+        resultsCount: result.total_results,
+        resultPage: result.page,
+        moviesListLoading: false,
+      }
     })
   }
 
-  constructor() {
-    super()
+  componentDidMount() {
     this.updatePage('returns')
   }
 
@@ -67,7 +73,7 @@ export default class MovieApp extends React.Component {
           />
         </div>
         <Input placeholder="Type to search..." />
-        <MovieCardList movies={this.state.movies} />
+        <MovieCardList movies={this.state.movies} loading={this.state.moviesListLoading} />
         <Pagination defaultCurrent={1} total={this.state.resultsCount} className="app__pagination" />
       </div>
     )
