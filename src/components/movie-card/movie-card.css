@@ -80,6 +80,10 @@
     margin-top: 16px;
 }
 
+.movie-card__error {
+    margin: 16px;
+}
+
 @media (max-width: 768px) {
     .movie-card__poster {
         max-width: 60px;

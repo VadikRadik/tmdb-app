@@ -1,5 +1,5 @@
 import React from 'react'
-import { Row, Spin } from 'antd'
+import { Row, Spin, Alert } from 'antd'
 
 import MovieCard from '../movie-card'
 
@@ -13,6 +13,17 @@ export default class MovieCardList extends React.Component {
   render() {
     if (this.props.loading) {
       return <Spin tip="Loading" size="large" className="movie-card-list__spin"></Spin>
+    }
+    if (this.props.error !== null) {
+      return (
+        <Alert
+          message="Error"
+          description={`Unable to load movies: ${this.props.error.message}`}
+          type="error"
+          showIcon
+          className="movie-card-list__alert"
+        />
+      )
     }
     if (this.props.movies === null) {
       return null

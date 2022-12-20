@@ -11,10 +11,14 @@ export default class MovieApp extends React.Component {
     resultsCount: null,
     resultPage: null,
     moviesListLoading: false,
+    error: null,
   }
 
   async getMovies(keyWords) {
-    this.setState({ movingListLoading: true })
+    this.setState({
+      movingListLoading: true,
+      error: null,
+    })
     const res = await fetch(
       // eslint-disable-next-line no-undef
       `https://api.themoviedb.org/3/search/movie?query=${keyWords}&api_key=${process.env.REACT_APP_TMDB_API_KEY}`
@@ -32,7 +36,11 @@ export default class MovieApp extends React.Component {
   }
 
   onMoviesListLoadError = (error) => {
-    console.log(`Ooops ${error}`)
+    console.log(`!!!!!! ${error}`)
+    this.setState({
+      error: error,
+      moviesListLoading: false,
+    })
   }
 
   onMoviesListLoaded = (result) => {
@@ -73,7 +81,7 @@ export default class MovieApp extends React.Component {
           />
         </div>
         <Input placeholder="Type to search..." />
-        <MovieCardList movies={this.state.movies} loading={this.state.moviesListLoading} />
+        <MovieCardList movies={this.state.movies} loading={this.state.moviesListLoading} error={this.state.error} />
         <Pagination defaultCurrent={1} total={this.state.resultsCount} className="app__pagination" />
       </div>
     )

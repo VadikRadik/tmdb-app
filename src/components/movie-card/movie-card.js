@@ -1,5 +1,5 @@
 import React from 'react'
-import { Col, Tag, Rate, Spin } from 'antd'
+import { Col, Tag, Rate, Spin, Alert } from 'antd'
 import { format } from 'date-fns'
 
 import './movie-card.css'
@@ -9,6 +9,7 @@ const OVERVIEW_MAX_LENGTH = 150
 export default class MovieCard extends React.Component {
   state = {
     loadingPoster: false,
+    error: null,
   }
 
   posterImage = null
@@ -30,7 +31,12 @@ export default class MovieCard extends React.Component {
         this.posterImage = imageObjectURL
         this.setState({ loadingPoster: false })
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        this.setState({
+          loadingPoster: false,
+          error: error,
+        })
+      })
   }
 
   render() {
@@ -39,11 +45,15 @@ export default class MovieCard extends React.Component {
     const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
     const colWidth = isMobile ? 24 : 12
 
-    const poster = this.state.loadingPoster ? (
+    let poster = this.state.loadingPoster ? (
       <Spin className="movie-card__spin" />
     ) : (
-      <img className="movie-card__poster" src={`${this.posterImage}`} />
+      <img className="movie-card__poster" src={`${this.posterImage}`} alt="Movie poster image" />
     )
+
+    if (this.state.error !== null) {
+      poster = <Alert message="Unable to load image" type="error" showIcon className="movie-card__error" />
+    }
 
     return (
       <Col span={colWidth}>

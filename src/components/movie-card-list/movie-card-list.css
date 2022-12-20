@@ -18,6 +18,11 @@
     margin-top: 20px;
 }
 
+.movie-card-list__alert {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 @media (max-width: 768px) {
     .movie-card-list {
         padding-top: 10px;
