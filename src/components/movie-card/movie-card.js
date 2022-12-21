@@ -65,7 +65,7 @@ export default class MovieCard extends React.Component {
                 <span>{title}</span>
                 <div className="movie-card__circle-rate">{Number(rate).toFixed(1)}</div>
               </div>
-              <div className="movie-card__date">{format(new Date(date), 'MMMM d, Y')}</div>
+              <div className="movie-card__date">{date ? format(new Date(date), 'MMMM d, Y') : null}</div>
               <div className="movie-card__tags">
                 <Tag>Action</Tag>
                 <Tag>Action</Tag>

@@ -29,7 +29,6 @@ export default class MovieCardList extends React.Component {
       return null
     }
 
-    console.log(this.props.movies)
     const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
     const gridGutters = isMobile ? [16, 20] : [36, 36]
     const cards = this.props.movies.map((movie) => {

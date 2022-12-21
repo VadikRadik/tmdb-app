@@ -20,7 +20,7 @@ body {
 
 .app {
     background: #FFFFFF;
-    width: 1110px;
+    width: 1140px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -39,7 +39,7 @@ body {
     align-self: center;
 }
 
-/*overwriting ant styles for pagination*/
+/*overwriting ant styles for pagination
 ul.ant-pagination > .ant-pagination-item-active {
     background-color: #1890FF;
     border-style: none;
@@ -51,7 +51,7 @@ ul.ant-pagination > .ant-pagination-item-active > a {
 
 ul.ant-pagination > .ant-pagination-item-active:hover > a {
     color: #E5E5E5;
-}
+}*/
 
 @media (max-width: 768px) {
 	.app {

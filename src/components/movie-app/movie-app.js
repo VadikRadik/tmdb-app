@@ -1,5 +1,6 @@
 import React from 'react'
 import { Tabs, Input, Pagination } from 'antd'
+import { debounce } from 'lodash'
 
 import MovieCardList from '../movie-card-list'
 
@@ -12,6 +13,7 @@ export default class MovieApp extends React.Component {
     resultPage: null,
     moviesListLoading: false,
     error: null,
+    searchWords: '',
   }
 
   async getMovies(keyWords) {
@@ -31,12 +33,24 @@ export default class MovieApp extends React.Component {
   }
 
   updatePage = (keyWords) => {
+    if (!keyWords.trim()) {
+      this.setState({
+        movies: [],
+        resultsCount: 0,
+        resultPage: 1,
+        movingListLoading: false,
+        error: null,
+      })
+      return
+    }
+
     this.setState({ moviesListLoading: true })
     this.getMovies(keyWords).then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
   }
 
+  debounceUpdatePage = debounce((searchWords) => this.updatePage(searchWords), 500)
+
   onMoviesListLoadError = (error) => {
-    console.log(`!!!!!! ${error}`)
     this.setState({
       error: error,
       moviesListLoading: false,
@@ -54,12 +68,18 @@ export default class MovieApp extends React.Component {
     })
   }
 
-  componentDidMount() {
-    this.updatePage('returns')
+  onSearchInput = (e) => {
+    this.setState(() => ({
+      searchWords: e.target.value,
+    }))
+    this.debounceUpdatePage(e.target.value)
   }
 
+  //componentDidMount() {
+  //  this.updatePage('returns')
+  //}
+
   render() {
-    console.log(this.state)
     return (
       <div className="app body__app">
         <div className="app__tabs-switch">
@@ -80,7 +100,7 @@ export default class MovieApp extends React.Component {
             ]}
           />
         </div>
-        <Input placeholder="Type to search..." />
+        <Input placeholder="Type to search..." onInput={this.onSearchInput} value={this.state.searchWords} />
         <MovieCardList movies={this.state.movies} loading={this.state.moviesListLoading} error={this.state.error} />
         <Pagination defaultCurrent={1} total={this.state.resultsCount} className="app__pagination" />
       </div>
