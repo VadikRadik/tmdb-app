@@ -28,6 +28,11 @@ export default class MovieCardList extends React.Component {
     if (this.props.movies === null) {
       return null
     }
+    if (this.props.movies.length === 0) {
+      return (
+        <Alert message="No movies found for your request" type="info" showIcon className="movie-card-list__alert" />
+      )
+    }
 
     const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
     const gridGutters = isMobile ? [16, 20] : [36, 36]

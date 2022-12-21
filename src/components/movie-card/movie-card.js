@@ -25,7 +25,9 @@ export default class MovieCard extends React.Component {
   componentDidMount() {
     this.setState({ loadingPoster: true })
     fetch(`https://image.tmdb.org/t/p/original/${this.props.poster}`)
-      .then((response) => response.blob())
+      .then((response) => {
+        return response.ok ? response.blob() : new Error()
+      })
       .then((imageBlob) => {
         const imageObjectURL = URL.createObjectURL(imageBlob)
         this.posterImage = imageObjectURL

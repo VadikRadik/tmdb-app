@@ -75,10 +75,6 @@ export default class MovieApp extends React.Component {
     this.debounceUpdatePage(e.target.value)
   }
 
-  //componentDidMount() {
-  //  this.updatePage('returns')
-  //}
-
   render() {
     return (
       <div className="app body__app">
