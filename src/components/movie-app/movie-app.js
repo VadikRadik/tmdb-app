@@ -110,7 +110,6 @@ export default class MovieApp extends React.Component {
 
   onMoviesListLoaded = (result) => {
     this.setState((state) => {
-      console.log(result.results)
       return {
         movies: this.sliceMoviesByPageSize(result.results, state.resultPage),
         resultsCount: result.total_results,
@@ -210,7 +209,12 @@ export default class MovieApp extends React.Component {
       let moviesCopy = JSON.parse(JSON.stringify(state.movies))
       let ratedMovie = moviesCopy.find((movie) => movie.id === movieId)
       ratedMovie.rating = rating
-      window.localStorage.setItem(`rate_${movieId}`, rating)
+
+      if (rating === 0) {
+        window.localStorage.removeItem(`rate_${movieId}`)
+      } else {
+        window.localStorage.setItem(`rate_${movieId}`, rating)
+      }
 
       return { movies: moviesCopy }
     })

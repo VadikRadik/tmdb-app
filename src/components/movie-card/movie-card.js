@@ -42,7 +42,38 @@ export default class MovieCard extends React.Component {
       })
   }
 
+  deleteRating = (movieId) => {
+    fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/rating?api_key=${
+        // eslint-disable-next-line no-undef
+        process.env.REACT_APP_TMDB_API_KEY
+      }&guest_session_id=${window.localStorage.getItem('guest_session_id')}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+      }
+    )
+      .then((response) => {
+        if (response.ok) {
+          this.props.onMovieRate(movieId, 0)
+        } else {
+          this.onRatingError(new Error(`Unable to post rate, responce status: ${response.status}`))
+        }
+      })
+      .catch((error) => {
+        this.onRatingError(error)
+        throw new Error(`Unable to post rate, error: ${error}`)
+      })
+  }
+
   onRatingChange = (movieId, newRating) => {
+    if (newRating === 0) {
+      this.deleteRating(movieId)
+      return
+    }
+
     fetch(
       `https://api.themoviedb.org/3/movie/${movieId}/rating?api_key=${
         // eslint-disable-next-line no-undef
