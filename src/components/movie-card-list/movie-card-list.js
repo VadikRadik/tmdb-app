@@ -40,11 +40,14 @@ export default class MovieCardList extends React.Component {
       return (
         <MovieCard
           key={movie.id}
+          id={movie.id}
           poster={movie.poster_path}
           title={movie.title}
           rate={movie.vote_average}
           date={movie.release_date}
           overview={movie.overview}
+          myRate={movie.rating ?? Number(window.localStorage.getItem(`rate_${movie.id}`))}
+          onMovieRate={this.props.onMovieRate}
         />
       )
     })

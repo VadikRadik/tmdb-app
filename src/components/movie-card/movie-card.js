@@ -9,7 +9,8 @@ const OVERVIEW_MAX_LENGTH = 150
 export default class MovieCard extends React.Component {
   state = {
     loadingPoster: false,
-    error: null,
+    imageError: null,
+    ratingError: null,
   }
 
   posterImage = null
@@ -41,8 +42,46 @@ export default class MovieCard extends React.Component {
       })
   }
 
+  onRatingChange = (movieId, newRating) => {
+    fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/rating?api_key=${
+        // eslint-disable-next-line no-undef
+        process.env.REACT_APP_TMDB_API_KEY
+      }&guest_session_id=${window.localStorage.getItem('guest_session_id')}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify({ value: newRating }),
+      }
+    )
+      .then((response) => {
+        if (response.ok) {
+          this.props.onMovieRate(movieId, newRating)
+        } else {
+          this.onRatingError(new Error(`Unable to post rate, responce status: ${response.status}`))
+        }
+      })
+      .catch((error) => {
+        this.onRatingError(error)
+        throw new Error(`Unable to post rate, error: ${error}`)
+      })
+  }
+
+  onRatingError = (error) => {
+    this.setState(() => ({
+      ratingError: new Error(`Unable to update rating: ${error.message}`),
+    }))
+    setTimeout(() => {
+      this.setState(() => ({
+        ratingError: null,
+      }))
+    }, 2500)
+  }
+
   render() {
-    const { title, rate, date, overview } = this.props
+    const { id, title, rate, date, overview, myRate } = this.props
 
     const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
     const colWidth = isMobile ? 24 : 12
@@ -53,7 +92,7 @@ export default class MovieCard extends React.Component {
       <img className="movie-card__poster" src={`${this.posterImage}`} alt="Movie poster image" />
     )
 
-    if (this.state.error !== null) {
+    if (this.state.imageError !== null) {
       poster = <Alert message="Unable to load image" type="error" showIcon className="movie-card__error" />
     }
 
@@ -75,12 +114,41 @@ export default class MovieCard extends React.Component {
                 <Tag>Action</Tag>
               </div>
               <div className="movie-card__info">{this.cutOverview(overview)}</div>
-              <Rate disabled count={10} defaultValue={rate} allowHalf={true} className="movie-card__rate" />
+              {this.state.ratingError ? (
+                <Alert message={this.state.ratingError.message} type="error" showIcon className="movie-card__rate" />
+              ) : (
+                <Rate
+                  count={10}
+                  value={myRate}
+                  allowHalf={true}
+                  className="movie-card__rate"
+                  onChange={(value) => {
+                    return this.onRatingChange(id, value)
+                  }}
+                />
+              )}
             </div>
           </div>
           <div className="movie-card-list__card--mobile">
             <div className="movie-card__info--mobile">{this.cutOverview(overview)}</div>
-            <Rate disabled count={10} defaultValue={rate} allowHalf={true} className="movie-card__rate--mobile" />
+            {this.state.ratingError ? (
+              <Alert
+                message={this.state.ratingError.message}
+                type="error"
+                showIcon
+                className="movie-card__rate--mobile"
+              />
+            ) : (
+              <Rate
+                count={10}
+                value={myRate}
+                allowHalf={true}
+                className="movie-card__rate--mobile"
+                onChange={(value) => {
+                  return this.onRatingChange(id, value)
+                }}
+              />
+            )}
           </div>
         </div>
       </Col>

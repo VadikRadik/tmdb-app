@@ -7,6 +7,8 @@ import MovieCardList from '../movie-card-list'
 import './movie-app.css'
 
 const MOVIES_PER_PAGE_RESPONCE = 20
+const TAB_SEARCH = '1'
+const TAB_RATE = '2'
 
 export default class MovieApp extends React.Component {
   state = {
@@ -17,6 +19,7 @@ export default class MovieApp extends React.Component {
     error: null,
     searchWords: '',
     pageSize: MOVIES_PER_PAGE_RESPONCE,
+    activeTab: TAB_SEARCH,
   }
 
   sizedCurrentPage = MOVIES_PER_PAGE_RESPONCE
@@ -62,6 +65,24 @@ export default class MovieApp extends React.Component {
     return res.json()
   }
 
+  async getRatedMovies(page = 1) {
+    this.setState({
+      movingListLoading: true,
+      error: null,
+    })
+    const res = await fetch(
+      `https://api.themoviedb.org/3/guest_session/${window.localStorage.getItem(
+        'guest_session_id'
+        // eslint-disable-next-line no-undef
+      )}/rated/movies?api_key=${process.env.REACT_APP_TMDB_API_KEY}&page=${page}`
+    )
+    if (!res.ok) {
+      throw new Error(`Unable to fetch movies, responce status: ${res.status}`)
+    }
+
+    return res.json()
+  }
+
   updatePage = (keyWords, page = 1) => {
     if (!keyWords.trim()) {
       this.setState({
@@ -89,6 +110,7 @@ export default class MovieApp extends React.Component {
 
   onMoviesListLoaded = (result) => {
     this.setState((state) => {
+      console.log(result.results)
       return {
         movies: this.sliceMoviesByPageSize(result.results, state.resultPage),
         resultsCount: result.total_results,
@@ -102,7 +124,24 @@ export default class MovieApp extends React.Component {
     this.setState(() => ({
       searchWords: e.target.value,
     }))
-    this.debounceUpdatePage(e.target.value)
+    if (this.state.activeTab === TAB_SEARCH) {
+      this.debounceUpdatePage(e.target.value)
+    }
+  }
+
+  onTabSwitched = (activeKey) => {
+    switch (activeKey) {
+      case '1':
+        this.setState({ activeTab: TAB_SEARCH })
+        this.updatePage(this.state.searchWords)
+        break
+      case '2':
+        this.setState({ moviesListLoading: true, activeTab: TAB_RATE })
+        this.getRatedMovies().then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
+        break
+      default:
+        break
+    }
   }
 
   render() {
@@ -116,18 +155,23 @@ export default class MovieApp extends React.Component {
               {
                 label: 'Search',
                 key: '1',
-                children: null,
               },
               {
                 label: 'Rated',
                 key: '2',
-                children: null,
               },
             ]}
+            activeKey={this.state.activeTab}
+            onChange={this.onTabSwitched}
           />
         </div>
         <Input placeholder="Type to search..." onInput={this.onSearchInput} value={this.state.searchWords} />
-        <MovieCardList movies={this.state.movies} loading={this.state.moviesListLoading} error={this.state.error} />
+        <MovieCardList
+          movies={this.state.movies}
+          loading={this.state.moviesListLoading}
+          error={this.state.error}
+          onMovieRate={this.onMovieRate}
+        />
         <Pagination
           defaultCurrent={1}
           total={this.state.resultsCount}
@@ -143,7 +187,6 @@ export default class MovieApp extends React.Component {
   }
 
   onPaginationChange = (page, pageSize) => {
-    //console.log(`page:${page}, pageSize:${pageSize}`)
     const newPage = pageSize === this.state.pageSize ? page : 1
     this.setState(() => ({
       pageSize: pageSize,
@@ -160,5 +203,16 @@ export default class MovieApp extends React.Component {
     const startIndex = Math.round(this.state.pageSize * (newPageNumber - 1)) % MOVIES_PER_PAGE_RESPONCE
     const finishIndex = startIndex + this.state.pageSize
     return movies.slice(startIndex, finishIndex)
+  }
+
+  onMovieRate = (movieId, rating) => {
+    this.setState((state) => {
+      let moviesCopy = JSON.parse(JSON.stringify(state.movies))
+      let ratedMovie = moviesCopy.find((movie) => movie.id === movieId)
+      ratedMovie.rating = rating
+      window.localStorage.setItem(`rate_${movieId}`, rating)
+
+      return { movies: moviesCopy }
+    })
   }
 }
