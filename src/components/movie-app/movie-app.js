@@ -21,6 +21,31 @@ export default class MovieApp extends React.Component {
 
   sizedCurrentPage = MOVIES_PER_PAGE_RESPONCE
 
+  componentDidMount() {
+    const guestSession = window.localStorage.getItem('guest_session_id')
+    if (!guestSession) {
+      this.createGuestSesstion()
+    }
+  }
+
+  createGuestSesstion() {
+    fetch(
+      // eslint-disable-next-line no-undef
+      `https://api.themoviedb.org/3/authentication/guest_session/new?api_key=${process.env.REACT_APP_TMDB_API_KEY}`
+    )
+      .then((response) => {
+        return response.ok
+          ? response.json()
+          : new Error(`Unable to fetch guest session, responce status: ${response.status}`)
+      })
+      .then((result) => {
+        window.localStorage.setItem('guest_session_id', result.guest_session_id)
+      })
+      .catch((error) => {
+        throw new Error(`Unable to fetch guest session, error: ${error}`)
+      })
+  }
+
   async getMovies(keyWords, page) {
     this.setState({
       movingListLoading: true,
