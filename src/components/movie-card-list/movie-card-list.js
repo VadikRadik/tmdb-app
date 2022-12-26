@@ -46,6 +46,7 @@ export default class MovieCardList extends React.Component {
           rate={movie.vote_average}
           date={movie.release_date}
           overview={movie.overview}
+          genres={movie.genre_ids}
           myRate={movie.rating ?? Number(window.localStorage.getItem(`rate_${movie.id}`))}
           onMovieRate={this.props.onMovieRate}
         />

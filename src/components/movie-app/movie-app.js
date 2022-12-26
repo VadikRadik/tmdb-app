@@ -3,6 +3,7 @@ import { Tabs, Input, Pagination } from 'antd'
 import { debounce } from 'lodash'
 
 import MovieCardList from '../movie-card-list'
+import { GenresProvider } from '../genres-context/genres-context'
 
 import './movie-app.css'
 
@@ -22,13 +23,14 @@ export default class MovieApp extends React.Component {
     activeTab: TAB_SEARCH,
   }
 
-  sizedCurrentPage = MOVIES_PER_PAGE_RESPONCE
+  genres = new Map()
 
   componentDidMount() {
     const guestSession = window.localStorage.getItem('guest_session_id')
     if (!guestSession) {
       this.createGuestSesstion()
     }
+    this.getGenres()
   }
 
   createGuestSesstion() {
@@ -47,6 +49,25 @@ export default class MovieApp extends React.Component {
       .catch((error) => {
         throw new Error(`Unable to fetch guest session, error: ${error}`)
       })
+  }
+
+  async getGenres() {
+    const res = await fetch(
+      // eslint-disable-next-line no-undef
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.REACT_APP_TMDB_API_KEY}`
+    )
+    if (!res.ok) {
+      throw new Error(`Unable to fetch genres, responce status: ${res.status}`)
+    } else {
+      res
+        .json()
+        .then((result) => {
+          result.genres.map((genre) => this.genres.set(genre.id, genre.name))
+        })
+        .catch((error) => {
+          throw new Error(`Unable to fetch genres, error: ${error}`)
+        })
+    }
   }
 
   async getMovies(keyWords, page) {
@@ -113,7 +134,6 @@ export default class MovieApp extends React.Component {
       return {
         movies: this.sliceMoviesByPageSize(result.results, state.resultPage),
         resultsCount: result.total_results,
-        //resultPage: result.page,
         moviesListLoading: false,
       }
     })
@@ -143,55 +163,19 @@ export default class MovieApp extends React.Component {
     }
   }
 
-  render() {
-    return (
-      <div className="app body__app">
-        <div className="app__tabs-switch">
-          <Tabs
-            defaultActiveKey="1"
-            centered="true"
-            items={[
-              {
-                label: 'Search',
-                key: '1',
-              },
-              {
-                label: 'Rated',
-                key: '2',
-              },
-            ]}
-            activeKey={this.state.activeTab}
-            onChange={this.onTabSwitched}
-          />
-        </div>
-        <Input placeholder="Type to search..." onInput={this.onSearchInput} value={this.state.searchWords} />
-        <MovieCardList
-          movies={this.state.movies}
-          loading={this.state.moviesListLoading}
-          error={this.state.error}
-          onMovieRate={this.onMovieRate}
-        />
-        <Pagination
-          defaultCurrent={1}
-          total={this.state.resultsCount}
-          className="app__pagination"
-          pageSizeOptions={[5, 10, 20]}
-          defaultPageSize={MOVIES_PER_PAGE_RESPONCE}
-          showQuickJumper={true}
-          onChange={this.onPaginationChange}
-          current={this.state.resultPage}
-        />
-      </div>
-    )
-  }
-
   onPaginationChange = (page, pageSize) => {
     const newPage = pageSize === this.state.pageSize ? page : 1
     this.setState(() => ({
       pageSize: pageSize,
       resultPage: newPage,
     }))
-    this.updatePage(this.state.searchWords, this.sizedPageToServerPage(newPage, pageSize))
+    if (this.state.activeTab === TAB_SEARCH) {
+      this.updatePage(this.state.searchWords, this.sizedPageToServerPage(newPage, pageSize))
+    } else if (this.state.activeTab === TAB_RATE) {
+      this.getRatedMovies(this.sizedPageToServerPage(newPage, pageSize))
+        .then(this.onMoviesListLoaded)
+        .catch(this.onMoviesListLoadError)
+    }
   }
 
   sizedPageToServerPage = (currentPage, pageSize) => {
@@ -218,5 +202,49 @@ export default class MovieApp extends React.Component {
 
       return { movies: moviesCopy }
     })
+  }
+
+  render() {
+    return (
+      <div className="app body__app">
+        <div className="app__tabs-switch">
+          <Tabs
+            defaultActiveKey="1"
+            centered="true"
+            items={[
+              {
+                label: 'Search',
+                key: '1',
+              },
+              {
+                label: 'Rated',
+                key: '2',
+              },
+            ]}
+            activeKey={this.state.activeTab}
+            onChange={this.onTabSwitched}
+          />
+        </div>
+        <Input placeholder="Type to search..." onInput={this.onSearchInput} value={this.state.searchWords} />
+        <GenresProvider value={this.genres}>
+          <MovieCardList
+            movies={this.state.movies}
+            loading={this.state.moviesListLoading}
+            error={this.state.error}
+            onMovieRate={this.onMovieRate}
+          />
+        </GenresProvider>
+        <Pagination
+          defaultCurrent={1}
+          total={this.state.resultsCount}
+          className="app__pagination"
+          pageSizeOptions={[5, 10, 20]}
+          defaultPageSize={MOVIES_PER_PAGE_RESPONCE}
+          showQuickJumper={true}
+          onChange={this.onPaginationChange}
+          current={this.state.resultPage}
+        />
+      </div>
+    )
   }
 }

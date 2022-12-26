@@ -2,6 +2,8 @@ import React from 'react'
 import { Col, Tag, Rate, Spin, Alert } from 'antd'
 import { format } from 'date-fns'
 
+import { GenresConsumer } from '../genres-context/genres-context'
+
 import './movie-card.css'
 
 const OVERVIEW_MAX_LENGTH = 150
@@ -112,7 +114,7 @@ export default class MovieCard extends React.Component {
   }
 
   render() {
-    const { id, title, rate, date, overview, myRate } = this.props
+    const { id, title, rate, date, overview, myRate, genres } = this.props
 
     const isMobile = window.matchMedia('only screen and (max-width: 768px)').matches
     const colWidth = isMobile ? 24 : 12
@@ -127,6 +129,17 @@ export default class MovieCard extends React.Component {
       poster = <Alert message="Unable to load image" type="error" showIcon className="movie-card__error" />
     }
 
+    const genresTags = (
+      <GenresConsumer>
+        {(genresMap) => {
+          const tags = genres.map((genreId) => {
+            return <Tag key={genreId}>{genresMap.get(genreId)}</Tag>
+          })
+          return <div className="movie-card__tags">{tags}</div>
+        }}
+      </GenresConsumer>
+    )
+
     return (
       <Col span={colWidth}>
         <div className="movie-card">
@@ -138,12 +151,7 @@ export default class MovieCard extends React.Component {
                 <div className="movie-card__circle-rate">{Number(rate).toFixed(1)}</div>
               </div>
               <div className="movie-card__date">{date ? format(new Date(date), 'MMMM d, Y') : null}</div>
-              <div className="movie-card__tags">
-                <Tag>Action</Tag>
-                <Tag>Action</Tag>
-                <Tag>Action</Tag>
-                <Tag>Action</Tag>
-              </div>
+              {genresTags}
               <div className="movie-card__info">{this.cutOverview(overview)}</div>
               {this.state.ratingError ? (
                 <Alert message={this.state.ratingError.message} type="error" showIcon className="movie-card__rate" />
