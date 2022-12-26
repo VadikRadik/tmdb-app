@@ -2,6 +2,7 @@ import React from 'react'
 import { Col, Tag, Rate, Spin, Alert } from 'antd'
 import { format } from 'date-fns'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 
 import { GenresConsumer } from '../genres-context/genres-context'
 
@@ -17,8 +18,8 @@ export default class MovieCard extends React.Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
-    rate: PropTypes.number.isRequired,
-    date: PropTypes.string.isRequired,
+    rate: PropTypes.number,
+    date: PropTypes.string,
     overview: PropTypes.string.isRequired,
     myRate: PropTypes.number,
     genres: PropTypes.arrayOf(PropTypes.number).isRequired,
@@ -55,7 +56,7 @@ export default class MovieCard extends React.Component {
       .catch((error) => {
         this.setState({
           loadingPoster: false,
-          error: error,
+          imageError: error,
         })
       })
   }
@@ -156,6 +157,14 @@ export default class MovieCard extends React.Component {
       </GenresConsumer>
     )
 
+    let circleRatingClass = classNames(
+      'movie-card__circle-rate',
+      { 'movie-card__circle-rate--red': rate < 3 },
+      { 'movie-card__circle-rate--orange': rate >= 3 && rate < 5 },
+      { 'movie-card__circle-rate--yellow': rate >= 5 && rate <= 7 },
+      { 'movie-card__circle-rate--green': rate > 7 }
+    )
+
     return (
       <Col span={colWidth}>
         <div className="movie-card">
@@ -164,7 +173,7 @@ export default class MovieCard extends React.Component {
             <div className="movie-card__info-layout">
               <div className="movie-card__title">
                 <span>{title}</span>
-                <div className="movie-card__circle-rate">{Number(rate).toFixed(1)}</div>
+                <div className={circleRatingClass}>{Number(rate).toFixed(1)}</div>
               </div>
               <div className="movie-card__date">{date ? format(new Date(date), 'MMMM d, Y') : null}</div>
               {genresTags}

@@ -19,8 +19,8 @@ export default class MovieCardList extends React.Component {
       PropTypes.shape({
         id: PropTypes.number.isRequired,
         title: PropTypes.string.isRequired,
-        rate: PropTypes.number.isRequired,
-        date: PropTypes.string.isRequired,
+        rate: PropTypes.number,
+        date: PropTypes.string,
         overview: PropTypes.string.isRequired,
         myRate: PropTypes.number,
         genres: PropTypes.arrayOf(PropTypes.number).isRequired,
