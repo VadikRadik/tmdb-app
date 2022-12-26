@@ -25,12 +25,19 @@ export default class MovieApp extends React.Component {
 
   genres = new Map()
 
+  constructor(props) {
+    super(props)
+
+    this.inputRef = React.createRef()
+  }
+
   componentDidMount() {
     const guestSession = window.localStorage.getItem('guest_session_id')
     if (!guestSession) {
       this.createGuestSesstion()
     }
     this.getGenres()
+    this.inputRef.current.focus()
   }
 
   createGuestSesstion() {
@@ -225,7 +232,12 @@ export default class MovieApp extends React.Component {
             onChange={this.onTabSwitched}
           />
         </div>
-        <Input placeholder="Type to search..." onInput={this.onSearchInput} value={this.state.searchWords} />
+        <Input
+          ref={this.inputRef}
+          placeholder="Type to search..."
+          onInput={this.onSearchInput}
+          value={this.state.searchWords}
+        />
         <GenresProvider value={this.genres}>
           <MovieCardList
             movies={this.state.movies}
