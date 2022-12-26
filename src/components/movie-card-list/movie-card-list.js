@@ -1,5 +1,6 @@
 import React from 'react'
 import { Row, Spin, Alert } from 'antd'
+import PropTypes from 'prop-types'
 
 import MovieCard from '../movie-card'
 
@@ -8,6 +9,26 @@ import './movie-card-list.css'
 export default class MovieCardList extends React.Component {
   static defaultProps = {
     movies: [],
+    loading: true,
+    error: null,
+    onMovieRate: () => {},
+  }
+
+  static propTypes = {
+    movies: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        title: PropTypes.string.isRequired,
+        rate: PropTypes.number.isRequired,
+        date: PropTypes.string.isRequired,
+        overview: PropTypes.string.isRequired,
+        myRate: PropTypes.number,
+        genres: PropTypes.arrayOf(PropTypes.number).isRequired,
+      })
+    ),
+    loading: PropTypes.bool,
+    error: PropTypes.shape({ message: PropTypes.string }),
+    onMovieRate: PropTypes.func,
   }
 
   render() {

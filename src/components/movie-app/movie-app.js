@@ -151,11 +151,11 @@ export default class MovieApp extends React.Component {
   onTabSwitched = (activeKey) => {
     switch (activeKey) {
       case '1':
-        this.setState({ activeTab: TAB_SEARCH })
+        this.setState({ activeTab: TAB_SEARCH, resultPage: 1 })
         this.updatePage(this.state.searchWords)
         break
       case '2':
-        this.setState({ moviesListLoading: true, activeTab: TAB_RATE })
+        this.setState({ moviesListLoading: true, activeTab: TAB_RATE, resultPage: 1 })
         this.getRatedMovies().then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
         break
       default:

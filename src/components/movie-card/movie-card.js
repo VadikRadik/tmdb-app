@@ -1,6 +1,7 @@
 import React from 'react'
 import { Col, Tag, Rate, Spin, Alert } from 'antd'
 import { format } from 'date-fns'
+import PropTypes from 'prop-types'
 
 import { GenresConsumer } from '../genres-context/genres-context'
 
@@ -9,6 +10,21 @@ import './movie-card.css'
 const OVERVIEW_MAX_LENGTH = 150
 
 export default class MovieCard extends React.Component {
+  static defaultProps = {
+    onMovieRate: () => {},
+  }
+
+  static propTypes = {
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    rate: PropTypes.number.isRequired,
+    date: PropTypes.string.isRequired,
+    overview: PropTypes.string.isRequired,
+    myRate: PropTypes.number,
+    genres: PropTypes.arrayOf(PropTypes.number).isRequired,
+    onMovieRate: PropTypes.func,
+  }
+
   state = {
     loadingPoster: false,
     imageError: null,
