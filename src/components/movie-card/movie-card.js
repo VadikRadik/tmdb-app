@@ -5,10 +5,13 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
 import { GenresConsumer } from '../genres-context/genres-context'
+import MovieService from '../../services/api/movie-service'
 
 import './movie-card.css'
 
 const OVERVIEW_MAX_LENGTH = 150
+
+const movieService = new MovieService()
 
 export default class MovieCard extends React.Component {
   static defaultProps = {
@@ -44,10 +47,9 @@ export default class MovieCard extends React.Component {
 
   componentDidMount() {
     this.setState({ loadingPoster: true })
-    fetch(`https://image.tmdb.org/t/p/original/${this.props.poster}`)
-      .then((response) => {
-        return response.ok ? response.blob() : new Error()
-      })
+
+    movieService
+      .getPoster(this.props.poster)
       .then((imageBlob) => {
         const imageObjectURL = URL.createObjectURL(imageBlob)
         this.posterImage = imageObjectURL
@@ -62,18 +64,8 @@ export default class MovieCard extends React.Component {
   }
 
   deleteRating = (movieId) => {
-    fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/rating?api_key=${
-        // eslint-disable-next-line no-undef
-        process.env.REACT_APP_TMDB_API_KEY
-      }&guest_session_id=${window.localStorage.getItem('guest_session_id')}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-      }
-    )
+    movieService
+      .deleteRating(movieId)
       .then((response) => {
         if (response.ok) {
           this.props.onMovieRate(movieId, 0)
@@ -93,19 +85,8 @@ export default class MovieCard extends React.Component {
       return
     }
 
-    fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/rating?api_key=${
-        // eslint-disable-next-line no-undef
-        process.env.REACT_APP_TMDB_API_KEY
-      }&guest_session_id=${window.localStorage.getItem('guest_session_id')}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({ value: newRating }),
-      }
-    )
+    movieService
+      .changeRating(movieId, newRating)
       .then((response) => {
         if (response.ok) {
           this.props.onMovieRate(movieId, newRating)

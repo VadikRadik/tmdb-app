@@ -23,7 +23,7 @@ export default class MovieCardList extends React.Component {
         date: PropTypes.string,
         overview: PropTypes.string.isRequired,
         myRate: PropTypes.number,
-        genres: PropTypes.arrayOf(PropTypes.number).isRequired,
+        genres: PropTypes.arrayOf(PropTypes.number),
       })
     ),
     loading: PropTypes.bool,

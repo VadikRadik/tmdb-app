@@ -6,7 +6,7 @@ body {
 
 @font-face {
     font-family: 'Inter UI';
-    src: url('./Inter-UI-Regular.otf') format("opentype");
+    src: url('/src/assets/fonts/Inter-UI-Regular.otf') format("opentype");
 }
 
 .body__app {

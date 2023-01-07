@@ -3,13 +3,14 @@ import { Tabs, Input, Pagination } from 'antd'
 import { debounce } from 'lodash'
 
 import MovieCardList from '../movie-card-list'
+import MovieService from '../../services/api/movie-service'
 import { GenresProvider } from '../genres-context/genres-context'
 
 import './movie-app.css'
 
 const MOVIES_PER_PAGE_RESPONCE = 20
-const TAB_SEARCH = '1'
-const TAB_RATE = '2'
+const TAB_SEARCH = 'search'
+const TAB_RATE = 'rate'
 
 export default class MovieApp extends React.Component {
   state = {
@@ -23,6 +24,8 @@ export default class MovieApp extends React.Component {
     activeTab: TAB_SEARCH,
   }
 
+  movieService = new MovieService()
+
   genres = new Map()
 
   constructor(props) {
@@ -34,81 +37,10 @@ export default class MovieApp extends React.Component {
   componentDidMount() {
     const guestSession = window.localStorage.getItem('guest_session_id')
     if (!guestSession) {
-      this.createGuestSesstion()
+      this.movieService.createGuestSesstion()
     }
-    this.getGenres()
+    this.movieService.getGenres().then((genres) => (this.genres = genres))
     this.inputRef.current.focus()
-  }
-
-  createGuestSesstion() {
-    fetch(
-      // eslint-disable-next-line no-undef
-      `https://api.themoviedb.org/3/authentication/guest_session/new?api_key=${process.env.REACT_APP_TMDB_API_KEY}`
-    )
-      .then((response) => {
-        return response.ok
-          ? response.json()
-          : new Error(`Unable to fetch guest session, responce status: ${response.status}`)
-      })
-      .then((result) => {
-        window.localStorage.setItem('guest_session_id', result.guest_session_id)
-      })
-      .catch((error) => {
-        throw new Error(`Unable to fetch guest session, error: ${error}`)
-      })
-  }
-
-  async getGenres() {
-    const res = await fetch(
-      // eslint-disable-next-line no-undef
-      `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.REACT_APP_TMDB_API_KEY}`
-    )
-    if (!res.ok) {
-      throw new Error(`Unable to fetch genres, responce status: ${res.status}`)
-    } else {
-      res
-        .json()
-        .then((result) => {
-          result.genres.map((genre) => this.genres.set(genre.id, genre.name))
-        })
-        .catch((error) => {
-          throw new Error(`Unable to fetch genres, error: ${error}`)
-        })
-    }
-  }
-
-  async getMovies(keyWords, page) {
-    this.setState({
-      movingListLoading: true,
-      error: null,
-    })
-    const res = await fetch(
-      // eslint-disable-next-line no-undef
-      `https://api.themoviedb.org/3/search/movie?query=${keyWords}&api_key=${process.env.REACT_APP_TMDB_API_KEY}&page=${page}`
-    )
-    if (!res.ok) {
-      throw new Error(`Unable to fetch movies, responce status: ${res.status}`)
-    }
-
-    return res.json()
-  }
-
-  async getRatedMovies(page = 1) {
-    this.setState({
-      movingListLoading: true,
-      error: null,
-    })
-    const res = await fetch(
-      `https://api.themoviedb.org/3/guest_session/${window.localStorage.getItem(
-        'guest_session_id'
-        // eslint-disable-next-line no-undef
-      )}/rated/movies?api_key=${process.env.REACT_APP_TMDB_API_KEY}&page=${page}`
-    )
-    if (!res.ok) {
-      throw new Error(`Unable to fetch movies, responce status: ${res.status}`)
-    }
-
-    return res.json()
   }
 
   updatePage = (keyWords, page = 1) => {
@@ -117,14 +49,14 @@ export default class MovieApp extends React.Component {
         movies: [],
         resultsCount: 0,
         resultPage: 1,
-        movingListLoading: false,
+        moviesListLoading: false,
         error: null,
       })
       return
     }
 
-    this.setState({ moviesListLoading: true })
-    this.getMovies(keyWords, page).then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
+    this.setState({ moviesListLoading: true, error: null })
+    this.movieService.getMovies(keyWords, page).then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
   }
 
   debounceUpdatePage = debounce((searchWords) => this.updatePage(searchWords), 500)
@@ -157,13 +89,13 @@ export default class MovieApp extends React.Component {
 
   onTabSwitched = (activeKey) => {
     switch (activeKey) {
-      case '1':
+      case TAB_SEARCH:
         this.setState({ activeTab: TAB_SEARCH, resultPage: 1 })
         this.updatePage(this.state.searchWords)
         break
-      case '2':
-        this.setState({ moviesListLoading: true, activeTab: TAB_RATE, resultPage: 1 })
-        this.getRatedMovies().then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
+      case TAB_RATE:
+        this.setState({ moviesListLoading: true, activeTab: TAB_RATE, resultPage: 1, error: null })
+        this.movieService.getRatedMovies().then(this.onMoviesListLoaded).catch(this.onMoviesListLoadError)
         break
       default:
         break
@@ -179,7 +111,9 @@ export default class MovieApp extends React.Component {
     if (this.state.activeTab === TAB_SEARCH) {
       this.updatePage(this.state.searchWords, this.sizedPageToServerPage(newPage, pageSize))
     } else if (this.state.activeTab === TAB_RATE) {
-      this.getRatedMovies(this.sizedPageToServerPage(newPage, pageSize))
+      this.setState({ moviesListLoading: true, error: null })
+      this.movieService
+        .getRatedMovies(this.sizedPageToServerPage(newPage, pageSize))
         .then(this.onMoviesListLoaded)
         .catch(this.onMoviesListLoadError)
     }
@@ -216,16 +150,16 @@ export default class MovieApp extends React.Component {
       <div className="app body__app">
         <div className="app__tabs-switch">
           <Tabs
-            defaultActiveKey="1"
+            defaultActiveKey={TAB_SEARCH}
             centered="true"
             items={[
               {
                 label: 'Search',
-                key: '1',
+                key: TAB_SEARCH,
               },
               {
                 label: 'Rated',
-                key: '2',
+                key: TAB_RATE,
               },
             ]}
             activeKey={this.state.activeTab}
